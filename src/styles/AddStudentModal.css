@@ -13,11 +13,12 @@
   align-items: center;
   z-index: 1000;
   animation: fadeIn 0.3s ease-out;
+  border-radius: 2px;
 }
 
 .modal-content {
   background: linear-gradient(to bottom, #ffffff, #f8fafc);
-  border-radius: 20px;
+  border-radius: 2px;
   box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.25), 0 0 1px rgba(0, 0, 0, 0.1);
   width: 95%;
   max-width: 600px;
@@ -194,6 +195,39 @@
 
 .form-group input:focus,
 .form-group select:focus {
+  outline: none;
+  border-color: #10b981;
+  background-color: #f0fdf4;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15), 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-group textarea {
+  padding: 14px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  color: #1e293b;
+  background-color: #ffffff;
+  transition: all 0.3s ease;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  resize: vertical;
+  width: 100%;
+}
+
+.form-group textarea::placeholder {
+  color: #cbd5e1;
+}
+
+.form-group textarea:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+.form-group textarea:focus {
   outline: none;
   border-color: #10b981;
   background-color: #f0fdf4;
