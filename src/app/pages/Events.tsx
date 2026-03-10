@@ -78,88 +78,96 @@ export default function Events() {
     },
   ];
 
-  const categoryColors: Record<string, string> = {
-    Academic: "bg-green-100 text-green-700",
-    Meeting: "bg-emerald-100 text-emerald-700",
-    Sports: "bg-teal-100 text-teal-700",
-    Seminar: "bg-lime-100 text-lime-700",
-    Cultural: "bg-green-100 text-green-700",
-    Career: "bg-emerald-100 text-emerald-700",
+  const categoryColors: Record<string, { bg: string; text: string }> = {
+    Academic: { bg: "#d4edda", text: "#155724" },
+    Meeting: { bg: "#e0f8f6", text: "#055160" },
+    Sports: { bg: "#cfe2ff", text: "#084298" },
+    Seminar: { bg: "#fff3cd", text: "#664d03" },
+    Cultural: { bg: "#d4edda", text: "#155724" },
+    Career: { bg: "#e0f8f6", text: "#055160" },
   };
 
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
+      <div className="d-flex align-items-center justify-content-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Events Calendar</h1>
+          <h1 className="text-3xl fw-bold text-gray-900">Events Calendar</h1>
           <p className="text-gray-600 mt-1">Browse and manage upcoming college events</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+        <button className="btn btn-success d-flex align-items-center gap-2">
           <Plus className="size-5" />
           Create Event
         </button>
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Total Events</p>
-                <p className="text-2xl font-bold text-gray-900">18</p>
+      <div className="row g-3">
+        <div className="col-12 col-md-6 col-lg-3">
+          <Card>
+            <CardContent className="p-3">
+              <div className="d-flex align-items-center justify-content-between">
+                <div>
+                  <p className="text-sm text-gray-600 mb-0">Total Events</p>
+                  <p className="text-2xl fw-bold text-gray-900 mb-0">18</p>
+                </div>
+                <Calendar className="size-8" style={{ color: "#0d6efd" }} />
               </div>
-              <Calendar className="size-8 text-blue-500" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">This Month</p>
-                <p className="text-2xl font-bold text-gray-900">6</p>
+            </CardContent>
+          </Card>
+        </div>
+        <div className="col-12 col-md-6 col-lg-3">
+          <Card>
+            <CardContent className="p-3">
+              <div className="d-flex align-items-center justify-content-between">
+                <div>
+                  <p className="text-sm text-gray-600 mb-0">This Month</p>
+                  <p className="text-2xl fw-bold text-gray-900 mb-0">6</p>
+                </div>
+                <Clock className="size-8 text-success" />
               </div>
-              <Clock className="size-8 text-green-500" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Attendees</p>
-                <p className="text-2xl font-bold text-gray-900">3,570</p>
+            </CardContent>
+          </Card>
+        </div>
+        <div className="col-12 col-md-6 col-lg-3">
+          <Card>
+            <CardContent className="p-3">
+              <div className="d-flex align-items-center justify-content-between">
+                <div>
+                  <p className="text-sm text-gray-600 mb-0">Attendees</p>
+                  <p className="text-2xl fw-bold text-gray-900 mb-0">3,570</p>
+                </div>
+                <Users className="size-8 text-info" />
               </div>
-              <Users className="size-8 text-emerald-500" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Categories</p>
-                <p className="text-2xl font-bold text-gray-900">6</p>
+            </CardContent>
+          </Card>
+        </div>
+        <div className="col-12 col-md-6 col-lg-3">
+          <Card>
+            <CardContent className="p-3">
+              <div className="d-flex align-items-center justify-content-between">
+                <div>
+                  <p className="text-sm text-gray-600 mb-0">Categories</p>
+                  <p className="text-2xl fw-bold text-gray-900 mb-0">6</p>
+                </div>
+                <Filter className="size-8" style={{ color: "#0dcaf0" }} />
               </div>
-              <Filter className="size-8 text-teal-500" />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* Category Filters */}
       <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-wrap gap-2">
-            <button className="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium">
+        <CardContent className="p-3">
+          <div className="d-flex flex-wrap gap-2">
+            <button className="btn btn-dark btn-sm">
               All Events
             </button>
             {Object.keys(categoryColors).map((category) => (
               <button
                 key={category}
-                className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+                className="btn btn-outline-secondary btn-sm"
               >
                 {category}
               </button>
@@ -169,61 +177,63 @@ export default function Events() {
       </Card>
 
       {/* Events List */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="row g-4">
         {events.map((event) => (
-          <Card key={event.id} className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <CardTitle className="text-xl mb-2">{event.title}</CardTitle>
-                  <Badge className={categoryColors[event.category]}>
-                    {event.category}
-                  </Badge>
-                </div>
-                <Badge variant="outline" className="ml-2">
-                  {event.status}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600 mb-4">{event.description}</p>
-
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 text-sm">
-                  <Calendar className="size-4 text-gray-400 flex-shrink-0" />
-                  <span className="text-gray-700">{event.date}</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <Clock className="size-4 text-gray-400 flex-shrink-0" />
-                  <span className="text-gray-700">{event.time}</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <MapPin className="size-4 text-gray-400 flex-shrink-0" />
-                  <span className="text-gray-700">{event.location}</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <Users className="size-4 text-gray-400 flex-shrink-0" />
-                  <span className="text-gray-700">
-                    {event.attendees} expected attendees
+          <div key={event.id} className="col-12 col-lg-6">
+            <Card>
+              <CardHeader>
+                <div className="d-flex align-items-start justify-content-between">
+                  <div className="flex-grow-1">
+                    <CardTitle className="fs-5 mb-2">{event.title}</CardTitle>
+                    <span className="badge d-inline-block" style={{ backgroundColor: categoryColors[event.category].bg, color: categoryColors[event.category].text }}>
+                      {event.category}
+                    </span>
+                  </div>
+                  <span className="badge bg-secondary ms-2">
+                    {event.status}
                   </span>
                 </div>
-              </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600 mb-3">{event.description}</p>
 
-              <div className="mt-4 pt-4 border-t border-gray-100">
-                <p className="text-xs text-gray-500 mb-3">
-                  Organized by: <span className="font-medium text-gray-700">{event.organizer}</span>
-                </p>
-                <div className="flex gap-2">
-                  <button className="flex-1 py-2 text-sm font-medium text-green-600 hover:bg-green-50 rounded-lg transition-colors">
-                    View Details
-                  </button>
-                  <button className="flex-1 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                    Register
-                  </button>
+                <div className="space-y-3">
+                  <div className="d-flex align-items-center gap-3 text-sm">
+                    <Calendar className="size-4 flex-shrink-0" style={{ color: "#6b7280" }} />
+                    <span style={{ color: "#374151" }}>{event.date}</span>
+                  </div>
+                  <div className="d-flex align-items-center gap-3 text-sm">
+                    <Clock className="size-4 flex-shrink-0" style={{ color: "#6b7280" }} />
+                    <span style={{ color: "#374151" }}>{event.time}</span>
+                  </div>
+                  <div className="d-flex align-items-center gap-3 text-sm">
+                    <MapPin className="size-4 flex-shrink-0" style={{ color: "#6b7280" }} />
+                    <span style={{ color: "#374151" }}>{event.location}</span>
+                  </div>
+                  <div className="d-flex align-items-center gap-3 text-sm">
+                    <Users className="size-4 flex-shrink-0" style={{ color: "#6b7280" }} />
+                    <span style={{ color: "#374151" }}>
+                      {event.attendees} expected attendees
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+
+                <div className="mt-3 pt-3 border-top">
+                  <p className="text-xs text-gray-500 mb-2">
+                    Organized by: <span className="fw-medium" style={{ color: "#374151" }}>{event.organizer}</span>
+                  </p>
+                  <div className="d-flex gap-2">
+                    <button className="flex-grow-1 btn btn-sm btn-outline-success">
+                      View Details
+                    </button>
+                    <button className="flex-grow-1 btn btn-sm btn-outline-secondary">
+                      Register
+                    </button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         ))}
       </div>
     </div>

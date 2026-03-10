@@ -1,35 +1,49 @@
+import React, { useState } from "react";
 import { Users, GraduationCap, Calendar, BookOpen, TrendingUp, ArrowUpRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import AddStudent from "./AddStudent";
+import "../../styles/AddStudentModal.css";
+
+interface StudentFormData {
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  studentNumber: string;
+  collegeProgram: string;
+  yearLevel: string;
+}
 
 export default function Dashboard() {
+  const [showAddStudentModal, setShowAddStudentModal] = useState(false);
+
   const stats = [
     {
       title: "Total Students",
       value: "2,847",
       change: "+12%",
       icon: Users,
-      color: "from-green-500 to-green-600",
+      color: "success",
     },
     {
       title: "Faculty Members",
       value: "243",
       change: "+3%",
       icon: GraduationCap,
-      color: "from-emerald-500 to-emerald-600",
+      color: "info",
     },
     {
       title: "Upcoming Events",
       value: "18",
       change: "+5",
       icon: Calendar,
-      color: "from-teal-500 to-teal-600",
+      color: "danger",
     },
     {
       title: "Active Research",
       value: "67",
       change: "+8%",
       icon: BookOpen,
-      color: "from-lime-500 to-lime-600",
+      color: "warning",
     },
   ];
 
@@ -46,6 +60,12 @@ export default function Dashboard() {
     { title: "Science Fair", date: "March 12, 2026", time: "9:00 AM" },
   ];
 
+  const handleAddStudent = (data: StudentFormData) => {
+    console.log("New student:", data);
+    // TODO: Add your API call here to save the student
+    setShowAddStudentModal(false);
+  };
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -55,87 +75,99 @@ export default function Dashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="row g-4">
         {stats.map((stat) => {
           const Icon = stat.icon;
+          const colorMap: Record<string, string> = {
+            success: "linear-gradient(135deg, #10b981, #059669)",
+            info: "linear-gradient(135deg, #06b6d4, #0891b2)",
+            danger: "linear-gradient(135deg, #ef4444, #dc2626)",
+            warning: "linear-gradient(135deg, #f59e0b, #d97706)"
+          };
           return (
-            <Card key={stat.title}>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">{stat.title}</p>
-                    <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
-                    <div className="flex items-center gap-1 mt-2">
-                      <TrendingUp className="size-4 text-green-500" />
-                      <span className="text-sm text-green-500 font-medium">
-                        {stat.change}
-                      </span>
-                      <span className="text-sm text-gray-500">vs last month</span>
+            <div key={stat.title} className="col-12 col-md-6 col-lg-3">
+              <Card>
+                <CardContent className="p-4">
+                  <div className="d-flex align-items-center justify-content-between">
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">{stat.title}</p>
+                      <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+                      <div className="d-flex align-items-center gap-1 mt-2">
+                        <TrendingUp className="size-4 text-green-500" />
+                        <span className="text-sm text-green-500 fw-medium">
+                          {stat.change}
+                        </span>
+                        <span className="text-sm text-gray-500">vs last month</span>
+                      </div>
+                    </div>
+                    <div className="p-3 rounded-xl d-flex align-items-center justify-content-center text-white" style={{ background: colorMap[stat.color], width: "60px", height: "60px", flexShrink: 0 }}>
+                      <Icon className="size-6" />
                     </div>
                   </div>
-                  <div className={`p-3 rounded-xl bg-gradient-to-br ${stat.color}`}>
-                    <Icon className="size-6 text-white" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           );
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="row g-4">
         {/* Recent Activities */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Activities</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentActivities.map((activity, index) => (
-                <div key={index} className="flex items-start gap-3 pb-4 border-b last:border-0 last:pb-0">
-                  <div className={`size-2 rounded-full mt-2 ${
-                    activity.type === "success" ? "bg-green-500" :
-                    activity.type === "warning" ? "bg-yellow-500" :
-                    activity.type === "event" ? "bg-emerald-500" :
-                    "bg-teal-500"
-                  }`}></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{activity.title}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{activity.time}</p>
+        <div className="col-12 col-lg-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Activities</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {recentActivities.map((activity, index) => (
+                  <div key={index} className="d-flex align-items-start gap-3 pb-3 border-bottom">
+                    <div className={`size-2 rounded-full mt-2 flex-shrink-0 ${
+                      activity.type === "success" ? "bg-green-500" :
+                      activity.type === "warning" ? "bg-yellow-500" :
+                      activity.type === "event" ? "bg-emerald-500" :
+                      "bg-teal-500"
+                    }`}></div>
+                    <div className="flex-grow-1">
+                      <p className="text-sm fw-medium text-gray-900 mb-0">{activity.title}</p>
+                      <p className="text-xs text-gray-500 mt-1 mb-0">{activity.time}</p>
+                    </div>
+                    <ArrowUpRight className="size-4 text-gray-400 flex-shrink-0" />
                   </div>
-                  <ArrowUpRight className="size-4 text-gray-400" />
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Upcoming Events */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Upcoming Events</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {upcomingEvents.map((event, index) => (
-                <div key={index} className="flex items-start gap-4 pb-4 border-b last:border-0 last:pb-0">
-                  <div className="flex flex-col items-center justify-center size-14 bg-green-50 rounded-lg flex-shrink-0">
-                    <span className="text-lg font-bold text-green-600">
-                      {event.date.split(" ")[1].replace(",", "")}
-                    </span>
-                    <span className="text-xs text-green-600">
-                      {event.date.split(" ")[0]}
-                    </span>
+        <div className="col-12 col-lg-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Upcoming Events</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {upcomingEvents.map((event, index) => (
+                  <div key={index} className="d-flex align-items-start gap-3 pb-3 border-bottom">
+                    <div className="d-flex flex-column align-items-center justify-content-center rounded p-3 flex-shrink-0" style={{ background: "#f0fdf4", width: "70px", height: "70px" }}>
+                      <span className="text-lg fw-bold" style={{ color: "#059669" }}>
+                        {event.date.split(" ")[1].replace(",", "")}
+                      </span>
+                      <span className="text-xs" style={{ color: "#059669" }}>
+                        {event.date.split(" ")[0]}
+                      </span>
+                    </div>
+                    <div className="flex-grow-1">
+                      <p className="text-sm fw-medium text-gray-900 mb-0">{event.title}</p>
+                      <p className="text-xs text-gray-500 mt-1 mb-0">{event.time}</p>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{event.title}</p>
-                    <p className="text-xs text-gray-500 mt-1">{event.time}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* Quick Actions */}
@@ -144,26 +176,44 @@ export default function Dashboard() {
           <CardTitle>Quick Actions</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <button className="p-4 border border-gray-200 rounded-lg hover:border-green-500 hover:bg-green-50 transition-colors text-center">
-              <Users className="size-6 mx-auto mb-2 text-green-600" />
-              <span className="text-sm font-medium text-gray-900">Add Student</span>
-            </button>
-            <button className="p-4 border border-gray-200 rounded-lg hover:border-emerald-500 hover:bg-emerald-50 transition-colors text-center">
-              <GraduationCap className="size-6 mx-auto mb-2 text-emerald-600" />
-              <span className="text-sm font-medium text-gray-900">Add Faculty</span>
-            </button>
-            <button className="p-4 border border-gray-200 rounded-lg hover:border-teal-500 hover:bg-teal-50 transition-colors text-center">
-              <Calendar className="size-6 mx-auto mb-2 text-teal-600" />
-              <span className="text-sm font-medium text-gray-900">Create Event</span>
-            </button>
-            <button className="p-4 border border-gray-200 rounded-lg hover:border-lime-500 hover:bg-lime-50 transition-colors text-center">
-              <BookOpen className="size-6 mx-auto mb-2 text-lime-600" />
-              <span className="text-sm font-medium text-gray-900">New Research</span>
-            </button>
+          <div className="row g-3">
+            <div className="col-6 col-md-3">
+              <button 
+                onClick={() => setShowAddStudentModal(true)}
+                className="w-100 p-3 border border-gray-200 rounded-lg btn-outline text-center"
+              >
+                <Users className="size-6 mx-auto mb-2 text-success" />
+                <span className="d-block text-sm fw-medium text-gray-900">Add Student</span>
+              </button>
+            </div>
+            <div className="col-6 col-md-3">
+              <button className="w-100 p-3 border border-gray-200 rounded-lg btn-outline text-center">
+                <GraduationCap className="size-6 mx-auto mb-2 text-info" />
+                <span className="d-block text-sm fw-medium text-gray-900">Add Faculty</span>
+              </button>
+            </div>
+            <div className="col-6 col-md-3">
+              <button className="w-100 p-3 border border-gray-200 rounded-lg btn-outline text-center">
+                <Calendar className="size-6 mx-auto mb-2 text-danger" />
+                <span className="d-block text-sm fw-medium text-gray-900">Create Event</span>
+              </button>
+            </div>
+            <div className="col-6 col-md-3">
+              <button className="w-100 p-3 border border-gray-200 rounded-lg btn-outline text-center">
+                <BookOpen className="size-6 mx-auto mb-2 text-warning" />
+                <span className="d-block text-sm fw-medium text-gray-900">New Research</span>
+              </button>
+            </div>
           </div>
         </CardContent>
       </Card>
+
+      {/* Add Student Modal */}
+      <AddStudent 
+        isOpen={showAddStudentModal}
+        onClose={() => setShowAddStudentModal(false)}
+        onSubmit={handleAddStudent}
+      />
     </div>
   );
 }

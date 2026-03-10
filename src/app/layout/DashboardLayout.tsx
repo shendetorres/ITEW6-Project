@@ -36,30 +36,31 @@ export default function DashboardLayout() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="layout-container bg-light">
       {/* Sidebar */}
       <aside
         className={`${
-          sidebarOpen ? "w-64" : "w-20"
-        } bg-white border-r border-gray-200 transition-all duration-300 flex flex-col`}
+          sidebarOpen ? "sidebar" : "sidebar collapsed"
+        }`}
+        style={{ width: sidebarOpen ? "250px" : "80px" }}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200">
+        <div className="sidebar-header d-flex justify-content-between align-items-center border-bottom">
           {sidebarOpen && (
-            <h1 className="font-semibold text-xl text-gray-800">
+            <h1 className="fs-5 fw-bold text-dark mb-0">
               College Portal
             </h1>
           )}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 hover:bg-gray-100 rounded-lg"
+            className="btn btn-sm btn-light"
           >
             <Menu className="size-5" />
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 space-y-1">
+        <nav className="sidebar-nav flex-grow-1 ps-0 ms-0 pt-3 ps-3">
           {navigation.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.path);
@@ -67,65 +68,64 @@ export default function DashboardLayout() {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-                  active
-                    ? "bg-green-50 text-green-600"
-                    : "text-gray-700 hover:bg-gray-100"
+                className={`sidebar-nav-link ${
+                  active ? "active" : ""
                 }`}
               >
-                <Icon className="size-5 flex-shrink-0" />
-                {sidebarOpen && <span className="text-sm font-medium">{item.name}</span>}
+                <Icon className="size-5" />
+                {sidebarOpen && <span className="text-sm fw-medium">{item.name}</span>}
               </Link>
             );
           })}
         </nav>
 
         {/* Settings */}
-        <div className="p-3 border-t border-gray-200">
-          <button className="flex items-center gap-3 px-3 py-2.5 w-full text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-            <Settings className="size-5 flex-shrink-0" />
-            {sidebarOpen && <span className="text-sm font-medium">Settings</span>}
+        <div className="ps-3 border-top">
+          <button className="sidebar-nav-link w-100 text-start">
+            <Settings className="size-5" />
+            {sidebarOpen && <span className="text-sm fw-medium">Settings</span>}
           </button>
         </div>
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-grow-1 d-flex flex-column overflow-hidden">
         {/* Top Navigation Bar */}
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
+        <header className="header h-16 border-bottom d-flex align-items-center justify-content-between px-3">
           {/* Search */}
-          <div className="flex-1 max-w-xl">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-5 text-gray-400" />
+          <div className="flex-grow-1">
+            <div className="position-relative">
+              <Search className="position-absolute start-0 top-50 translate-middle-y size-5 text-muted" />
               <input
                 type="text"
                 placeholder="Search..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="form-control ps-5"
+                style={{ maxWidth: "400px" }}
               />
             </div>
           </div>
 
           {/* Right section */}
-          <div className="flex items-center gap-4">
-            <button className="relative p-2 hover:bg-gray-100 rounded-lg">
-              <Bell className="size-5 text-gray-600" />
-              <span className="absolute top-1.5 right-1.5 size-2 bg-red-500 rounded-full"></span>
+          <div className="d-flex align-items-center gap-3">
+            <button className="btn btn-sm btn-light position-relative">
+              <Bell className="size-5" style={{ color: "#6b7280" }} />
+              <span className="position-absolute top-0 end-0 bg-danger rounded-circle" style={{ width: "8px", height: "8px" }}></span>
             </button>
 
-            <div className="flex items-center gap-3">
-              <div className="size-9 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+            <div className="d-flex align-items-center gap-3">
+              <div className="bg-gradient-to-br d-flex align-items-center justify-content-center text-white fw-semibold rounded-circle" style={{ width: "36px", height: "36px", background: "linear-gradient(135deg, #10b981, #059669)" }}>
                 AD
               </div>
               <div className="text-sm">
-                <div className="font-medium text-gray-800">Admin User</div>
-                <div className="text-xs text-gray-500">Administrator</div>
+                <div className="fw-medium text-dark">Admin User</div>
+                <div className="text-xs" style={{ color: "#6b7280" }}>Administrator</div>
               </div>
             </div>
           </div>
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto p-6">
+        <main className="main-content flex-grow-1 overflow-auto p-4">
           <Outlet />
         </main>
       </div>
