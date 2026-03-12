@@ -41,18 +41,18 @@ export default function DashboardLayout() {
   ]);
 
   const navigation = [
-    { name: "Dashboard", path: "/", icon: LayoutDashboard },
-    { name: "Students", path: "/students", icon: Users },
-    { name: "Faculty", path: "/faculty", icon: GraduationCap },
-    { name: "Events", path: "/events", icon: Calendar },
-    { name: "Schedules", path: "/schedules", icon: Clock },
-    { name: "Research", path: "/research", icon: FlaskConical },
-    { name: "Instructions", path: "/instructions", icon: BookOpen },
+    { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+    { name: "Students", path: "/dashboard/students", icon: Users },
+    { name: "Faculty", path: "/dashboard/faculty", icon: GraduationCap },
+    { name: "Events", path: "/dashboard/events", icon: Calendar },
+    { name: "Schedules", path: "/dashboard/schedules", icon: Clock },
+    { name: "Research", path: "/dashboard/research", icon: FlaskConical },
+    { name: "Instructions", path: "/dashboard/instructions", icon: BookOpen },
   ];
 
   const isActive = (path: string) => {
-    if (path === "/") {
-      return location.pathname === "/";
+    if (path === "/dashboard") {
+      return location.pathname === "/dashboard";
     }
     return location.pathname.startsWith(path);
   };
