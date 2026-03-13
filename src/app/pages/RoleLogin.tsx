@@ -58,6 +58,9 @@ export default function RoleLogin() {
     password: false,
   });
 
+  const [loading, setLoading] = useState(false);
+  const [loginError, setLoginError] = useState("");
+
   const identifierError =
     touched.identifier && identifier.trim().length === 0 ? `${meta.idLabel} is required.` : "";
   const passwordError =
@@ -65,18 +68,45 @@ export default function RoleLogin() {
 
   const hasError = Boolean(identifierError || passwordError);
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setDidSubmit(false);
+    setLoginError("");
     setTouched({ identifier: true, password: true });
     if (identifier.trim().length === 0 || password.trim().length === 0) return;
 
-    localStorage.setItem("ccs_portal_role", role);
-    setDidSubmit(true);
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:3000/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          identifier: identifier.trim(),
+          password,
+          role,
+        }),
+      });
 
-    if (role === "student") navigate("/student-dashboard");
-    else if (role === "faculty") navigate("/faculty-dashboard");
-    else navigate("/admin-dashboard");
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        localStorage.setItem("ccs_portal_role", role);
+        localStorage.setItem("ccs_portal_user", JSON.stringify(data.user));
+        setDidSubmit(true);
+
+        if (role === "student") navigate("/student-dashboard");
+        else if (role === "faculty") navigate("/faculty-dashboard");
+        else navigate("/admin-dashboard");
+      } else {
+        setLoginError(data.error || 'Login failed');
+      }
+    } catch (error) {
+      setLoginError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -119,6 +149,20 @@ export default function RoleLogin() {
             {meta.helper}
           </p>
 
+          {loginError && (
+            <div
+              className="mb-3 p-3 rounded"
+              style={{
+                background: "#fee2e2",
+                border: "1px solid #fecaca",
+                color: "#dc2626",
+              }}
+              role="alert"
+            >
+              {loginError}
+            </div>
+          )}
+
           {didSubmit && (
             <div
               className="mb-3 p-3 rounded"
@@ -129,7 +173,7 @@ export default function RoleLogin() {
               }}
               role="status"
             >
-              Validation passed. Hook this up to your authentication logic next.
+              Login successful! Redirecting...
             </div>
           )}
 
@@ -170,14 +214,15 @@ export default function RoleLogin() {
             <button
               type="submit"
               className="btn portal-btn w-100"
+              disabled={loading}
               style={{
                 background: meta.accent,
                 color: "white",
                 border: "1px solid rgba(0,0,0,0)",
-                opacity: hasError && (touched.identifier || touched.password) ? 0.95 : 1,
+                opacity: (hasError && (touched.identifier || touched.password)) || loading ? 0.95 : 1,
               }}
             >
-              Login
+              {loading ? "Logging in..." : "Login"}
             </button>
 
             <div className="d-flex justify-content-between align-items-center mt-3">
