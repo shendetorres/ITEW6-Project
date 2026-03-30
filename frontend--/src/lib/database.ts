@@ -1,7 +1,6 @@
 import { DocumentData } from 'firebase/firestore';
 
-const API_BASE = 'http://localhost:8000'; // Adjust to your backend URL
-
+const API_BASE = 'http://localhost:8000'; 
 /**
  * Generic function to get a single document by ID
  */
@@ -247,12 +246,12 @@ export const studentDB = {
  * Faculty-specific operations
  */
 export const facultyDB = {
-  getFaculty: (facultyId: string) => getDocument('faculty', facultyId),
-  getAllFaculty: () => getCollection('faculty'),
-  addFaculty: (data: any) => addDocument('faculty', data),
+  getFaculty: (facultyId: string) => getDocument('faculties', facultyId),
+  getAllFaculty: () => getCollection('faculties'),
+  addFaculty: (data: any) => addDocument('faculties', data),
   updateFaculty: (facultyId: string, data: any) =>
-    updateDocument('faculty', facultyId, data),
-  deleteFaculty: (facultyId: string) => deleteDocument('faculty', facultyId),
+    updateDocument('faculties', facultyId, data),
+  deleteFaculty: (facultyId: string) => deleteDocument('faculties', facultyId),
 };
 
 /**
@@ -308,7 +307,7 @@ export const eventsDB = {
 };
 
 /**
- * Announcements operations
+ * Research operations
  */
 export const researchDB = {
   getResearch: (researchId: string) => getDocument('research', researchId),
@@ -318,6 +317,7 @@ export const researchDB = {
   deleteResearch: (researchId: string) => deleteDocument('research', researchId),
 };
 
+/** Announcements operations */
 export const announcementsDB = {
   getAnnouncement: (announcementId: string) =>
     getDocument('announcements', announcementId),
