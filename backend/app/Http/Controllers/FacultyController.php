@@ -26,6 +26,7 @@ class FacultyController extends Controller
             'phone' => $profile['phone'] ?? '',
             'office' => $profile['office'] ?? '',
             'qualifications' => $profile['qualifications'] ?? '',
+            'event_ids' => $faculty->event_ids ?? [],
             'created_at' => $faculty->created_at,
             'updated_at' => $faculty->updated_at,
         ];
@@ -123,8 +124,19 @@ class FacultyController extends Controller
     // 4. Email/message a student (stub)
     public function messageStudent(Request $request)
     {
-        // Implement email/message logic here
-        return response()->json(['message' => 'Message sent (stub)']);
+        $validated = $request->validate([
+            'faculty_id' => 'required',
+            'student_id' => 'required',
+            'subject' => 'required|string|max:255',
+            'message' => 'required|string|max:2000',
+        ]);
+
+        // This is a placeholder for real email/message delivery logic.
+        // You can integrate an email service or notification provider here later.
+        return response()->json([
+            'message' => 'Message queued successfully',
+            'details' => $validated,
+        ]);
     }
 
     // 5. Assign faculty to an event

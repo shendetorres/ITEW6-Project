@@ -1,6 +1,6 @@
 import { DocumentData } from 'firebase/firestore';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8080';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
 
 const getErrorMessage = async (response: Response, fallback: string) => {
   try {
@@ -157,8 +157,7 @@ export const queryCollection = async <T extends DocumentData>(
 export const setDocument = async <T extends DocumentData>(
   collectionName: string,
   docId: string,
-  data: T,
-  merge = true
+  data: T
 ): Promise<void> => {
   try {
     const response = await fetch(`${API_BASE}/admin/${collectionName}/${docId}`, {
@@ -283,6 +282,33 @@ export const facultyDB = {
   updateFaculty: (facultyId: string, data: any) =>
     updateDocument('faculties', facultyId, data),
   deleteFaculty: (facultyId: string) => deleteDocument('faculties', facultyId),
+  assignSubject: (facultyId: string, subject: string) =>
+    fetch(`${API_BASE}/admin/faculty/${facultyId}/assign-subject`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ subject }),
+    }).then(async (response) => {
+      if (!response.ok) throw new Error(await getErrorMessage(response, 'Failed to assign subject'));
+      return response.json();
+    }),
+  assignEvent: (facultyId: string, eventId: string) =>
+    fetch(`${API_BASE}/admin/faculty/${facultyId}/assign-event`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ event_id: eventId }),
+    }).then(async (response) => {
+      if (!response.ok) throw new Error(await getErrorMessage(response, 'Failed to assign event'));
+      return response.json();
+    }),
+  messageStudent: (payload: any) =>
+    fetch(`${API_BASE}/admin/faculty/message-student`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(payload),
+    }).then(async (response) => {
+      if (!response.ok) throw new Error(await getErrorMessage(response, 'Failed to send message'));
+      return response.json();
+    }),
 };
 
 /**
