@@ -135,9 +135,23 @@ export const updateRecord = async (collectionName, id, data) =>
 
     const records = db[key] ?? [];
     const index = records.findIndex((record) => String(record.id) === String(id));
-    if (index === -1) return null;
 
     const timestamp = nowIso();
+    if (index === -1) {
+      const created = normalizeRecord({
+        id,
+        ...data,
+        created_at: timestamp,
+        createdAt: timestamp,
+        updated_at: timestamp,
+        updatedAt: timestamp,
+      });
+
+      db[key] = [...records, created];
+      await saveDb(db);
+      return created;
+    }
+
     const existing = records[index];
     const updated = normalizeRecord({
       ...existing,
