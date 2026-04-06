@@ -67,11 +67,11 @@ Route::post('/admin/subjects/{id}/assign-regular', [SubjectController::class, 'a
 // User management routes
 Route::get('/admin/users', [UserController::class, 'index']); // List all users
 Route::post('/admin/users', [UserController::class, 'store']); // Create user
-Route::get('/admin/users/{id}', [UserController::class, 'show']); // Get user
-Route::put('/admin/users/{id}', [UserController::class, 'update']); // Update user
-Route::delete('/admin/users/{id}', [UserController::class, 'destroy']); // Delete user
 Route::get('/admin/users/admins', [UserController::class, 'listAdmins']); // List admin users
-Route::get('/admin/users/{id}/activity', [UserController::class, 'activityLog']); // User activity log
+Route::get('/admin/users/{id}/activity', [UserController::class, 'activityLog'])->whereNumber('id'); // User activity log
+Route::get('/admin/users/{id}', [UserController::class, 'show'])->whereNumber('id'); // Get user
+Route::put('/admin/users/{id}', [UserController::class, 'update'])->whereNumber('id'); // Update user
+Route::delete('/admin/users/{id}', [UserController::class, 'destroy'])->whereNumber('id'); // Delete user
 
 // Event management routes
 Route::get('/admin/events', [App\Http\Controllers\EventController::class, 'index']);

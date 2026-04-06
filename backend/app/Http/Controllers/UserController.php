@@ -15,42 +15,88 @@ class UserController extends Controller
         $this->firestoreService = $firestoreService;
     }
 
+    private function safeFirestore(callable $callback)
+    {
+        try {
+            if ($this->firestoreService->isAvailable()) {
+                return $callback();
+            }
+        } catch (\Throwable $e) {
+            \Log::error('Firestore operation failed: ' . $e->getMessage());
+        }
+
+        return null;
+    }
+
     // 1. User activity log
     public function activityLog($id)
     {
-        $document = $this->firestoreService->getDocument('users', $id);
-        if ($document->exists()) {
-            $data = $document->data();
-            return response()->json(['activity_log' => $data['activity_log'] ?? []]);
+        $result = $this->safeFirestore(function () use ($id) {
+            $document = $this->firestoreService->getDocument('users', $id);
+            if ($document->exists()) {
+                $data = $document->data();
+                return response()->json(['activity_log' => $data['activity_log'] ?? []]);
+            }
+            return response()->json(['message' => 'User not found'], 404);
+        });
+
+        if ($result !== null) {
+            return $result;
         }
-        return response()->json(['message' => 'User not found'], 404);
+
+        $user = User::find($id);
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        return response()->json([
+            'activity_log' => $user->activity_log ?? [],
+            'message' => 'Firebase unavailable; returning local activity log fallback',
+        ]);
     }
 
     // 2. List all admin users
     public function listAdmins()
     {
-        $documents = $this->firestoreService->getCollection('users');
-        $admins = [];
-        foreach ($documents as $document) {
-            $data = $document->data();
-            if ($data['role'] === 'admin') {
-                $admins[] = $data;
+        $result = $this->safeFirestore(function () {
+            $documents = $this->firestoreService->getCollection('users');
+            $admins = [];
+            foreach ($documents as $document) {
+                $data = $document->data();
+                if (($data['role'] ?? '') === 'admin') {
+                    $data['id'] = $document->id();
+                    $admins[] = $data;
+                }
             }
+            return response()->json($admins);
+        });
+
+        if ($result !== null) {
+            return $result;
         }
-        return response()->json($admins);
+
+        return response()->json(User::where('role', 'admin')->get());
     }
 
     // API CRUD methods
     public function index()
     {
-        $documents = $this->firestoreService->getCollection('users');
-        $users = [];
-        foreach ($documents as $document) {
-            $data = $document->data();
-            $data['id'] = $document->id();
-            $users[] = $data;
+        $result = $this->safeFirestore(function () {
+            $documents = $this->firestoreService->getCollection('users');
+            $users = [];
+            foreach ($documents as $document) {
+                $data = $document->data();
+                $data['id'] = $document->id();
+                $users[] = $data;
+            }
+            return response()->json($users);
+        });
+
+        if ($result !== null) {
+            return $result;
         }
-        return response()->json($users);
+
+        return response()->json(User::all());
     }
 
     public function store(Request $request)
@@ -75,13 +121,26 @@ class UserController extends Controller
 
     public function show($id)
     {
-        $document = $this->firestoreService->getDocument('users', $id);
-        if ($document->exists()) {
-            $data = $document->data();
-            $data['id'] = $document->id();
-            return response()->json($data);
+        $result = $this->safeFirestore(function () use ($id) {
+            $document = $this->firestoreService->getDocument('users', $id);
+            if ($document->exists()) {
+                $data = $document->data();
+                $data['id'] = $document->id();
+                return response()->json($data);
+            }
+            return response()->json(['message' => 'User not found'], 404);
+        });
+
+        if ($result !== null) {
+            return $result;
         }
-        return response()->json(['message' => 'User not found'], 404);
+
+        $user = User::find($id);
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        return response()->json($user);
     }
 
     public function update(Request $request, $id)

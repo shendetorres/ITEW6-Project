@@ -12,7 +12,7 @@ const initialFormState = {
   email: '',
   idNumber: '',
   year: '1st',
-  program: 'BSCS',
+  program: 'Computer Science',
   status: 'Regular',
   phone: '',
   address: '',
@@ -48,15 +48,23 @@ export const AdminStudents: React.FC = () => {
   const { searchQuery, results: filteredStudents, setSearchQuery } = useSearch(studentsData || [], searchFields);
   const students = studentsData || [];
 
+  const normalizeMultiValueField = (value: any): string[] => {
+    if (Array.isArray(value)) {
+      return value.map((item) => String(item).trim()).filter(Boolean);
+    }
+    if (typeof value === 'string') {
+      return value
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean);
+    }
+    return [];
+  };
+
   const skillOptions = useMemo(() => {
     const unique = new Set<string>();
     students.forEach((student: any) => {
-      const rawSkills = typeof student.skills === 'string' ? student.skills : '';
-      rawSkills
-        .split(',')
-        .map((s: string) => s.trim())
-        .filter(Boolean)
-        .forEach((s: string) => unique.add(s));
+      normalizeMultiValueField(student.skills).forEach((skill) => unique.add(skill));
     });
     return Array.from(unique).sort((a, b) => a.localeCompare(b));
   }, [students]);
@@ -64,12 +72,7 @@ export const AdminStudents: React.FC = () => {
   const organizationOptions = useMemo(() => {
     const unique = new Set<string>();
     students.forEach((student: any) => {
-      const rawOrganizations = typeof student.organizations === 'string' ? student.organizations : '';
-      rawOrganizations
-        .split(',')
-        .map((o: string) => o.trim())
-        .filter(Boolean)
-        .forEach((o: string) => unique.add(o));
+      normalizeMultiValueField(student.organizations).forEach((organization) => unique.add(organization));
     });
     return Array.from(unique).sort((a, b) => a.localeCompare(b));
   }, [students]);
@@ -77,42 +80,80 @@ export const AdminStudents: React.FC = () => {
   const activityOptions = useMemo(() => {
     const unique = new Set<string>();
     students.forEach((student: any) => {
-      const rawActivities = typeof student.activities === 'string' ? student.activities : '';
-      rawActivities
-        .split(',')
-        .map((a: string) => a.trim())
-        .filter(Boolean)
-        .forEach((a: string) => unique.add(a));
+      normalizeMultiValueField(student.activities).forEach((activity) => unique.add(activity));
     });
     return Array.from(unique).sort((a, b) => a.localeCompare(b));
   }, [students]);
+
+  const renderAcademicHistory = (history: any[]) => {
+    if (!Array.isArray(history) || history.length === 0) {
+      return <p className="text-gray-500 text-sm">No academic history available</p>;
+    }
+
+    return (
+      <div className="space-y-4">
+        {history.map((yearData, yearIndex) => (
+          <div key={yearIndex} className="border rounded-lg p-4 bg-gray-50">
+            <h4 className="font-semibold text-lg mb-2">Year {yearData.year}</h4>
+            {yearData.semesters?.map((semesterData: any, semIndex: number) => (
+              <div key={semIndex} className="mb-3">
+                <h5 className="font-medium text-md mb-1">Semester {semesterData.semester}</h5>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full bg-white border rounded">
+                    <thead>
+                      <tr className="bg-gray-100">
+                        <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Subject</th>
+                        <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Grade</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {semesterData.subjects?.map((subject: any, subIndex: number) => (
+                        <tr key={subIndex} className="border-t">
+                          <td className="px-4 py-2 text-sm text-gray-900">{subject.name}</td>
+                          <td className="px-4 py-2 text-sm text-gray-900 font-semibold">{subject.grade}</td>
+                        </tr>
+                      )) || <tr><td colSpan={2} className="px-4 py-2 text-sm text-gray-500">No subjects</td></tr>}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )) || <p className="text-gray-500 text-sm">No semesters</p>}
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   const displayedStudents = useMemo(() => {
     return filteredStudents.filter((student: any) => {
       const matchesYear = yearFilter === 'All' || student.year === yearFilter;
       const matchesStatus = statusFilter === 'All' || student.status === statusFilter;
 
-      const studentSkills = typeof student.skills === 'string' ? student.skills.toLowerCase() : '';
-      const matchesSkill = skillFilter === 'All' || studentSkills.split(',').map((s: string) => s.trim()).includes(skillFilter.toLowerCase());
+      const studentSkills = normalizeMultiValueField(student.skills).map((s) => s.toLowerCase());
+      const matchesSkill = skillFilter === 'All' || studentSkills.includes(skillFilter.toLowerCase());
 
-      const studentOrganizations = typeof student.organizations === 'string' ? student.organizations.toLowerCase() : '';
+      const studentOrganizations = normalizeMultiValueField(student.organizations).map((o) => o.toLowerCase());
       const matchesOrganization =
-        organizationFilter === 'All' || studentOrganizations.split(',').map((o: string) => o.trim()).includes(organizationFilter.toLowerCase());
+        organizationFilter === 'All' || studentOrganizations.includes(organizationFilter.toLowerCase());
 
-      const studentActivities = typeof student.activities === 'string' ? student.activities.toLowerCase() : '';
+      const studentActivities = normalizeMultiValueField(student.activities).map((a) => a.toLowerCase());
       const matchesActivity =
-        activityFilter === 'All' || studentActivities.split(',').map((a: string) => a.trim()).includes(activityFilter.toLowerCase());
+        activityFilter === 'All' || studentActivities.includes(activityFilter.toLowerCase());
 
       return matchesYear && matchesStatus && matchesSkill && matchesOrganization && matchesActivity;
     });
-  }, [filteredStudents, yearFilter, statusFilter, skillFilter, organizationFilter]);
+  }, [filteredStudents, yearFilter, statusFilter, skillFilter, organizationFilter, activityFilter]);
 
   const handleEdit = (student: any) => {
     setEditingId(student.id);
     setFormData({
       ...initialFormState,
       ...student,
+      skills: Array.isArray(student.skills) ? student.skills.join(', ') : student.skills || '',
+      organizations: Array.isArray(student.organizations) ? student.organizations.join(', ') : student.organizations || '',
+      activities: Array.isArray(student.activities) ? student.activities.join(', ') : student.activities || '',
       password: '',
+      academicHistory: JSON.stringify(student.academicHistory || []),
     });
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -152,13 +193,33 @@ export const AdminStudents: React.FC = () => {
       return;
     }
 
+    // Parse academic history
+    let parsedAcademicHistory: any[] = [];
+    if (formData.academicHistory.trim()) {
+      try {
+        parsedAcademicHistory = JSON.parse(formData.academicHistory);
+      } catch (e) {
+        alert('Invalid JSON in Academic History. Please check the format.');
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     try {
-      const { password, ...dataToSave } = formData;
       const cleanedDataToSave = {
-        ...dataToSave,
         name: normalizedName,
         email: normalizedEmail,
+        department: formData.program,
+        year_level: parseInt(formData.year.replace('st', '').replace('nd', '').replace('rd', '').replace('th', '')),
+        status: formData.status === 'Regular' ? 'active' : 'inactive',
+        idNumber: formData.idNumber,
+        phone: formData.phone,
+        address: formData.address,
+        dateOfBirth: formData.dateOfBirth,
+        skills: formData.skills.split(',').map((s: string) => s.trim()).filter(Boolean),
+        organizations: formData.organizations.split(',').map((o: string) => o.trim()).filter(Boolean),
+        activities: formData.activities.split(',').map((a: string) => a.trim()).filter(Boolean),
+        academicHistory: parsedAcademicHistory,
       };
 
       if (editingId) {
@@ -264,8 +325,8 @@ export const AdminStudents: React.FC = () => {
                 onChange={handleChange}
                 className="border p-2 rounded-lg bg-white outline-none focus:ring-2 focus:ring-orange-500"
               >
-                <option value="BSCS">BSCS</option>
-                <option value="BSIT">BSIT</option>
+                <option value="Computer Science">Computer Science</option>
+                <option value="Information Technology">Information Technology</option>
               </select>
             </div>
 
@@ -291,14 +352,33 @@ export const AdminStudents: React.FC = () => {
             <FormInput label="Organizations" id="organizations" value={formData.organizations} onChange={handleChange} />
             <FormInput label="Activities" id="activities" value={formData.activities} onChange={handleChange} />
             <div className="col-span-full">
-              <label className="text-sm font-semibold mb-1 text-gray-700">Academic History</label>
+              <label className="text-sm font-semibold mb-1 text-gray-700">Academic History (JSON format)</label>
               <textarea
                 id="academicHistory"
                 value={formData.academicHistory}
                 onChange={handleChange}
-                rows={4}
+                rows={6}
+                placeholder={`Example:
+[
+  {
+    "year": 1,
+    "semesters": [
+      {
+        "semester": 1,
+        "subjects": [
+          {"name": "Mathematics", "grade": "A"},
+          {"name": "English", "grade": "B+"}
+        ]
+      },
+      {
+        "semester": 2,
+        "subjects": [...]
+      }
+    ]
+  },
+  ...
+]`}
                 className="w-full border rounded-xl p-3 bg-white outline-none focus:ring-2 focus:ring-orange-500"
-                placeholder="List academic history entries separated by commas or bullets"
               />
             </div>
 
@@ -485,7 +565,7 @@ export const AdminStudents: React.FC = () => {
               </div>
               <div className="col-span-full">
                 <p className="text-xs uppercase text-gray-400 font-bold mb-1">Academic History</p>
-                <p className="text-gray-700 text-sm">{viewingStudent.academicHistory || 'Not provided'}</p>
+                {renderAcademicHistory(viewingStudent.academicHistory)}
               </div>
             </div>
             <div className="bg-gray-50 p-4 flex justify-end">
