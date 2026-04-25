@@ -294,8 +294,8 @@ export const createRecord = async (collectionName, data) =>
     const timestamp = nowIso();
 
     const record = normalizeRecord({
-      id: randomUUID(),
       ...data,
+      id: randomUUID(),
       created_at: timestamp,
       updated_at: timestamp,
       createdAt: timestamp,
@@ -322,8 +322,8 @@ export const updateRecord = async (collectionName, id, data) =>
 
     if (index === -1) {
       const created = normalizeRecord({
-        id,
         ...data,
+        id,
         created_at: timestamp,
         updated_at: timestamp,
         createdAt: timestamp,
@@ -338,6 +338,7 @@ export const updateRecord = async (collectionName, id, data) =>
     const updated = normalizeRecord({
       ...records[index],
       ...data,
+      id: records[index].id,
       updated_at: timestamp,
       updatedAt: timestamp,
     });

@@ -59,6 +59,8 @@ interface ScheduleFormData {
   startTime: string;
   endTime: string;
   room: string;
+  department: string;
+  yearLevel: string;
   section: string;
 }
 
@@ -90,6 +92,8 @@ export const AdminScheduling: React.FC = () => {
     startTime: '',
     endTime: '',
     room: '',
+    department: '',
+    yearLevel: '',
     section: '',
   });
   const [formErrors, setFormErrors] = useState<ScheduleFormErrors>({});
@@ -163,6 +167,65 @@ export const AdminScheduling: React.FC = () => {
     return Array.from(new Set([...uniqueSections, ...fallbackSections]));
   }, [students]);
 
+  // Parse section to extract year level and department
+  const parseSectionInfo = (section: string) => {
+    const match = section.match(/^(\d+)([A-Z]+)-([A-Z]+)$/);
+    if (match) {
+      return {
+        year: match[1],
+        department: match[2],
+        sectionLetter: match[3],
+      };
+    }
+    return null;
+  };
+
+  // Get unique departments from sections
+  const departmentOptions = useMemo(() => {
+    const departments = new Set<string>();
+    sectionOptions.forEach((section) => {
+      const info = parseSectionInfo(section);
+      if (info) {
+        departments.add(info.department);
+      }
+    });
+    return Array.from(departments).sort();
+  }, [sectionOptions]);
+
+  // Get unique year levels from sections
+  const yearLevelOptions = useMemo(() => {
+    const years = new Set<string>();
+    sectionOptions.forEach((section) => {
+      const info = parseSectionInfo(section);
+      if (info) {
+        years.add(info.year);
+      }
+    });
+    return Array.from(years).sort();
+  }, [sectionOptions]);
+
+  // Filter sections based on selected department and year level
+  const filteredSectionOptions = useMemo(() => {
+    if (!formData.department && !formData.yearLevel) {
+      return sectionOptions;
+    }
+
+    return sectionOptions.filter((section) => {
+      const info = parseSectionInfo(section);
+      if (!info) return false;
+
+      if (formData.department && info.department !== formData.department) {
+        return false;
+      }
+
+      if (formData.yearLevel && info.year !== formData.yearLevel) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [sectionOptions, formData.department, formData.yearLevel]);
+
   const getCourseLabel = (schedule: Schedule) => {
     const subjectId = schedule.subject_id || schedule.subjectId || schedule.course_id || schedule.courseId;
     if (!subjectId) return '-';
@@ -196,6 +259,8 @@ export const AdminScheduling: React.FC = () => {
     const errors: ScheduleFormErrors = {};
 
     if (!data.courseId.trim()) errors.courseId = 'Course or subject is required.';
+    if (!data.department.trim()) errors.department = 'Department is required.';
+    if (!data.yearLevel.trim()) errors.yearLevel = 'Year level is required.';
     if (!data.section.trim()) errors.section = 'Section is required.';
     if (!data.day.trim()) errors.day = 'Day is required.';
     if (!data.startTime.trim()) errors.startTime = 'Start time is required.';
@@ -216,6 +281,8 @@ export const AdminScheduling: React.FC = () => {
       startTime: '',
       endTime: '',
       room: '',
+      department: '',
+      yearLevel: '',
       section: '',
     });
     setFormErrors({});
@@ -347,6 +414,48 @@ export const AdminScheduling: React.FC = () => {
         <form onSubmit={handleCreateSchedule} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
+              <select
+                value={formData.department}
+                onChange={(event) => updateField('department', event.target.value)}
+                className={`w-full px-3 py-2 border rounded-lg ${
+                  formErrors.department ? 'border-red-500' : 'border-gray-300'
+                }`}
+                required
+              >
+                <option value="">Select department</option>
+                {departmentOptions.map((dept) => (
+                  <option key={dept} value={dept}>
+                    {dept}
+                  </option>
+                ))}
+              </select>
+              {formErrors.department && <p className="text-red-600 text-xs mt-1">{formErrors.department}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Year Level</label>
+              <select
+                value={formData.yearLevel}
+                onChange={(event) => updateField('yearLevel', event.target.value)}
+                className={`w-full px-3 py-2 border rounded-lg ${
+                  formErrors.yearLevel ? 'border-red-500' : 'border-gray-300'
+                }`}
+                required
+              >
+                <option value="">Select year level</option>
+                {yearLevelOptions.map((year) => (
+                  <option key={year} value={year}>
+                    Year {year}
+                  </option>
+                ))}
+              </select>
+              {formErrors.yearLevel && <p className="text-red-600 text-xs mt-1">{formErrors.yearLevel}</p>}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Course / Subject</label>
               <select
                 value={formData.courseId}
@@ -452,15 +561,18 @@ export const AdminScheduling: React.FC = () => {
               <select
                 value={formData.section}
                 onChange={(event) => updateField('section', event.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                className={`w-full px-3 py-2 border rounded-lg ${
+                  formErrors.section ? 'border-red-500' : 'border-gray-300'
+                }`}
                 required
+                disabled={!formData.department || !formData.yearLevel}
               >
                 <option value="">Select section</option>
                 {(() => {
                   const selectedSubject = subjectById.get(String(formData.courseId));
                   const subjectSections = selectedSubject?.sections || [];
-                  // Show subject-specific sections if available, otherwise show all sections
-                  const options = subjectSections.length > 0 ? subjectSections : sectionOptions;
+                  // Show subject-specific sections if available, otherwise show filtered sections
+                  const options = subjectSections.length > 0 ? subjectSections : filteredSectionOptions;
                   return options.map((section) => (
                     <option key={section} value={section}>
                       {section}
@@ -469,19 +581,27 @@ export const AdminScheduling: React.FC = () => {
                 })()}
               </select>
               {formErrors.section && <p className="text-red-600 text-xs mt-1">{formErrors.section}</p>}
-              {formData.courseId && (() => {
-                const selectedSubject = subjectById.get(String(formData.courseId));
-                const subjectSections = selectedSubject?.sections || [];
-                return subjectSections.length > 0 ? (
-                  <p className="text-xs text-green-600 mt-1">
-                    Using pre-assigned sections for this subject
-                  </p>
-                ) : (
-                  <p className="text-xs text-amber-600 mt-1">
-                    No sections assigned to this subject yet. Add sections in Subjects & Curriculum.
-                  </p>
-                );
-              })()}
+              {!formData.department || !formData.yearLevel ? (
+                <p className="text-xs text-amber-600 mt-1">
+                  Please select department and year level first
+                </p>
+              ) : (
+                <>
+                  {formData.courseId && (() => {
+                    const selectedSubject = subjectById.get(String(formData.courseId));
+                    const subjectSections = selectedSubject?.sections || [];
+                    return subjectSections.length > 0 ? (
+                      <p className="text-xs text-green-600 mt-1">
+                        Using pre-assigned sections for this subject
+                      </p>
+                    ) : (
+                      <p className="text-xs text-amber-600 mt-1">
+                        Showing sections for {formData.department} Year {formData.yearLevel}
+                      </p>
+                    );
+                  })()}
+                </>
+              )}
             </div>
 
             <div>

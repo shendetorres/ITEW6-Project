@@ -108,10 +108,11 @@ export const AdminResearch: React.FC = () => {
     }
 
     try {
-      if (editingId) {
-        await researchDB.updateResearch(editingId, form);
+      if (editingId !== null) {
+        const { id: _id, ...payload } = form;
+        await researchDB.updateResearch(editingId, payload);
         setResearch((prev) =>
-          prev.map((r) => (r.id === editingId ? { ...r, ...form } : r))
+          prev.map((r) => (r.id === editingId ? { ...r, ...payload, id: editingId } : r))
         );
         alert('Research updated successfully');
       } else {

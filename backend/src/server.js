@@ -413,6 +413,48 @@ app.use((_request, response) => {
   response.status(404).json({ message: 'Route not found' });
 });
 
-app.listen(port, () => {
-  console.log(`Node backend running on http://127.0.0.1:${port}`);
+// Keep the process alive
+process.on('uncaughtException', (error) => {
+  console.error('[uncaughtException]', error);
 });
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[unhandledRejection]', reason);
+});
+
+// Aggressive keep-alive
+const keepAlive = setInterval(() => {
+  // This keeps the event loop alive forever
+}, 1000);
+keepAlive.unref();
+
+// Find an available port if 8080 is busy
+const startServer = (tryPort) => {
+  try {
+    const server = app.listen(tryPort, '0.0.0.0', () => {
+      console.log(`Node backend running on http://127.0.0.1:${tryPort}`);
+    });
+
+    server.on('close', () => {
+      console.log('Server closed');
+    });
+
+    server.on('error', (error) => {
+      console.error(`[server error on port ${tryPort}]`, error.message);
+      if (error.code === 'EADDRINUSE' && tryPort < 8090) {
+        console.log(`Port ${tryPort} is busy, trying port ${tryPort + 1}...`);
+        startServer(tryPort + 1);
+      } else {
+        console.error('Failed to start server after trying multiple ports');
+        process.exit(1);
+      }
+    });
+  } catch (error) {
+    console.error('[startup error]', error);
+    if (tryPort < 8090) {
+      startServer(tryPort + 1);
+    }
+  }
+};
+
+startServer(port);
